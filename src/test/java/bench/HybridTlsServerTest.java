@@ -18,7 +18,7 @@ public class HybridTlsServerTest {
         m.setAccessible(true);
         Object ctxObj = m.invoke(srv);
         assertNotNull(ctxObj, "createServerContext should not return null");
-        assertTrue(ctxObj instanceof SSLContext, "returned object should be an SSLContext");
+        assertInstanceOf(SSLContext.class, ctxObj, "returned object should be an SSLContext");
 
         SSLContext ctx = (SSLContext) ctxObj;
         assertNotNull(ctx.getServerSocketFactory(), "SSLContext should provide a server socket factory");
@@ -40,4 +40,3 @@ public class HybridTlsServerTest {
         }
     }
 }
-

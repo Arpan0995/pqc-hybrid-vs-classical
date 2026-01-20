@@ -59,7 +59,6 @@ public class HybridTlsServerKeystoreTest {
 
         // call the package-private helper with the generated keystore
         HybridTlsServer srv = new HybridTlsServer(0, null);
-        X509Certificate[] certs = new X509Certificate[]{cert};
         try (ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray())) {
             assertDoesNotThrow(() -> {
                 srv.createServerContext(bin, pass);
@@ -67,4 +66,3 @@ public class HybridTlsServerKeystoreTest {
         }
     }
 }
-

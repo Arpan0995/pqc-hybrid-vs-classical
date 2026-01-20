@@ -2,10 +2,13 @@ package bench;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.Socket;
 import java.security.SecureRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HybridTlsClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HybridTlsClient.class);
 
     private final String host;
     private final int port;
@@ -69,7 +72,9 @@ public class HybridTlsClient {
                 writer.write("hello\n");
                 writer.flush();
                 String resp = reader.readLine();
-                // Optionally log resp
+                if (resp != null) {
+                    LOGGER.info("Server response: " + resp);
+                }
             }
         }
 
@@ -78,24 +83,33 @@ public class HybridTlsClient {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            System.err.println("Usage: HybridTlsServer classical|hybrid");
-            System.exit(1);
-        }
-        String mode = args[0];
+        try {
+            if (args.length < 1) {
+                System.err.println("Usage: HybridTlsServer classical|hybrid");
+                System.exit(1);
+            }
+            String mode = args[0];
 
-        String[] namedGroups;
-        if ("classical".equalsIgnoreCase(mode)) {
-            namedGroups = new String[] {"x25519"};
-        } else if ("hybrid".equalsIgnoreCase(mode)) {
-            namedGroups = new String[] {"X25519MLKEM768", "x25519"};
-            // Replace "X25519MLKEM768" with the exact hybrid group name your JDK supports (see JEP 527 / docs).[web:29][web:45]
-        } else {
-            throw new IllegalArgumentException("Unknown mode: " + mode);
-        }
+            String[] namedGroups;
+            switch (mode.toLowerCase()) {
+                case "classical":
+                    namedGroups = new String[]{"x25519"};
+                    break;
+                case "hybrid":
+                    namedGroups = new String[]{"X25519MLKEM768","x25519"};
+                    break;
+                case "pqc":
+                     namedGroups = new String[]{"MLKEM768"};
+                     break;
+                default:
+                    throw new IllegalArgumentException("Unknown mode: " + mode);
+            }
 
-        HybridTlsClient client = new HybridTlsClient("localhost", 8443, namedGroups);
-        client.runBenchmark(100);
+            HybridTlsClient client = new HybridTlsClient("localhost", 8443, namedGroups);
+            client.runBenchmark(100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
