@@ -54,18 +54,30 @@ public class HybridTlsServer {
         char[] pwdChars = password.toCharArray();
 
         try (InputStream in = new FileInputStream("server.keystore")) {
-            ks.load(in, pwdChars);
+            // delegate to helper that accepts a stream
+            return createServerContext(in, pwdChars);
+        } catch (FileNotFoundException fnfe) {
+            System.out.println("server.keystore not found on classpath or filesystem; using default SSLContext (no key managers)");
+            // fallback: initialize default SSLContext
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, null, new SecureRandom());
+            // wipe password char array for safety
+            java.util.Arrays.fill(pwdChars, '\0');
+            return ctx;
         }
+    }
 
-        KeyManagerFactory kmf =
-                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(ks, pwdChars);
+    /* package-private for testing */
+    SSLContext createServerContext(InputStream keystoreStream, char[] password) throws Exception {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(keystoreStream, password);
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(ks, password);
 
         SSLContext ctx = SSLContext.getInstance("TLS");
         ctx.init(kmf.getKeyManagers(), null, new SecureRandom());
 
-        // wipe password char array for safety
-        java.util.Arrays.fill(pwdChars, '\0');
         return ctx;
     }
 
