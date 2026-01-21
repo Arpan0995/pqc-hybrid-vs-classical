@@ -1,101 +1,30 @@
-Run 0: handshake=49.731 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 1: handshake=6.012 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 2: handshake=6.471 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 3: handshake=5.162 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 4: handshake=5.941 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 5: handshake=5.946 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 6: handshake=3.592 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 7: handshake=3.105 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 8: handshake=4.483 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 9: handshake=4.902 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 10: handshake=3.830 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 11: handshake=3.722 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 12: handshake=2.784 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 13: handshake=3.107 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 14: handshake=2.866 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 15: handshake=2.812 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 16: handshake=1.998 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 17: handshake=2.451 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 18: handshake=1.629 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 19: handshake=3.090 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 20: handshake=2.553 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 21: handshake=3.497 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 22: handshake=3.022 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 23: handshake=2.568 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 24: handshake=1.932 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 25: handshake=1.984 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 26: handshake=1.817 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 27: handshake=3.167 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 28: handshake=3.144 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 29: handshake=2.199 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 30: handshake=1.772 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 31: handshake=1.749 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 32: handshake=2.622 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 33: handshake=2.948 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 34: handshake=1.960 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 35: handshake=2.081 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 36: handshake=2.078 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 37: handshake=1.404 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 38: handshake=1.545 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 39: handshake=1.466 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 40: handshake=1.436 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 41: handshake=1.985 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 42: handshake=1.521 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 43: handshake=2.368 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 44: handshake=1.521 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 45: handshake=1.477 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 46: handshake=1.311 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 47: handshake=1.579 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 48: handshake=2.129 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 49: handshake=2.223 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 50: handshake=3.171 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 51: handshake=2.074 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 52: handshake=1.387 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 53: handshake=1.023 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 54: handshake=1.122 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 55: handshake=1.088 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 56: handshake=0.991 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 57: handshake=1.953 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 58: handshake=1.175 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 59: handshake=2.490 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 60: handshake=1.431 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 61: handshake=1.327 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 62: handshake=0.966 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 63: handshake=0.964 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 64: handshake=1.186 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 65: handshake=0.927 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 66: handshake=0.796 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 67: handshake=0.845 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 68: handshake=0.822 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 69: handshake=0.922 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 70: handshake=2.242 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 71: handshake=0.991 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 72: handshake=0.812 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 73: handshake=1.044 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 74: handshake=0.950 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 75: handshake=0.907 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 76: handshake=0.932 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 77: handshake=0.996 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 78: handshake=0.898 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 79: handshake=0.820 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 80: handshake=2.097 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 81: handshake=1.940 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 82: handshake=1.316 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 83: handshake=1.886 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 84: handshake=1.871 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 85: handshake=2.318 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 86: handshake=1.192 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 87: handshake=1.217 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 88: handshake=1.010 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 89: handshake=0.783 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 90: handshake=0.988 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 91: handshake=1.351 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 92: handshake=1.044 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 93: handshake=0.948 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 94: handshake=0.864 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 95: handshake=1.155 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 96: handshake=1.439 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 97: handshake=0.825 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 98: handshake=0.813 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Run 99: handshake=0.846 ms, protocol=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384
-Average handshake time (ms): 2.4984379999999997
+===========================================
+Client Mode: CLASSICAL
+TLS Named Groups: x25519
+Concurrency: 100 threads
+Runs per thread: 10
+Total connections: 1000
+===========================================
+
+===========================================
+           BENCHMARK RESULTS
+===========================================
+
+Connections: 1000 success, 0 failed
+Duration: 0.58 seconds
+Throughput: 1731.20 connections/sec
+
+--- Handshake Latency (ms) ---
+  Min:    1.144
+  Mean:   32.394
+  Median: 5.386
+  p90:    113.434
+  p95:    150.685
+  p99:    233.288
+  Max:    364.500
+
+===========================================
+
+CSV_OUTPUT:
+concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput
+100,10,1000,0,32.394,5.386,113.434,150.685,233.288,364.500,1731.20
