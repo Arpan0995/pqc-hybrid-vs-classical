@@ -102,21 +102,135 @@ Where the code sets the named-group label
 
 If your JDK uses different labels for the hybrid group, change these strings in the two main methods to exactly match the names reported by your JVM.
 
-Test methodology (what we ran and what we verified)
---------------------------------------------------
-This section documents exactly what tests were implemented and executed against this codebase and the outcomes observed (past tense):
+Test methodology
+----------------
+This section explains how we performed the handshake-latency experiments (the exact procedure used to produce the CSV outputs and summary data), not the unit/integration test cases.
 
-- Unit-level checks: we created unit tests that validated the server's SSLContext creation and the ability to obtain an SSLServerSocketFactory. These tests ensured the code paths that load keystores and initialize key managers behaved as expected.
+1) Environment and repeatability
+- Use the same JDK and machine for all modes to keep results comparable.
+- Record the JDK vendor/version, OS, CPU, and any JVM flags used.
+- Run each experiment in a quiet environment (minimal other load) and repeat each configuration across multiple independent trials.
 
-- Keystore validation: one test programmatically generated a JKS keystore (using BouncyCastle) and wrote it to `target/server.keystore`. The test invoked the server's keystore-loading helper and asserted an SSLContext was returned, confirming the keystore loading path worked with a generated certificate.
+2) Keystore and server setup
+- Ensure a test keystore is available at `server.keystore` (or `target/server.keystore`). Use the keytool commands earlier in this README to create one.
+- Start the server in the chosen mode and port, redirecting logs to a file under `results/raw/` so you capture the server `INFO` lines (supported named groups and handshake diagnostics). Example (hybrid mode):
 
-- Integration smoke test: we implemented an integration-style smoke test that:
-  - Wrote a temporary keystore into `target/server.keystore`.
-  - Started `HybridTlsServer` in a background thread on an ephemeral port.
-  - Ran `HybridTlsClient` to perform a single handshake against the running server for both `classical` and `hybrid` modes; the test programmatically checked the JVM's supported named-groups and skipped a mode when the named-group required for that mode was not present on the running JVM.
-  - Verified that the client did not throw exceptions during the handshake and that the server recorded handshake timing and negotiated parameters.
+```bash
+java -cp target/classes bench.HybridTlsServer hybrid 8443 > results/raw/server_hybrid.log 2>&1 &
+```
 
-- Logging & diagnostics: during the smoke tests we used the server logs (which list supported named groups at startup) and the client's CSV output lines to confirm successful negotiation and to capture handshake timings for analysis.
+3) Warm-up pass
+- Perform a warm-up run before collecting measurements to let the JVM JIT optimize hot code paths. A recommended warm-up is 100 handshakes using the same client invocation you will use for measurement.
+
+4) Measurement parameters
+- Choose a set of concurrency levels and runs-per-thread to measure under different load shapes. Typical example sets we used:
+  - Concurrency levels: 1, 10, 100
+  - Runs per thread: 500 (for latency distributions) and 1000 (for throughput/tail under load)
+- For each (mode, concurrency, runs) configuration, run multiple independent trials (we used 3–5 trials) and randomize the sequence of modes across trials to reduce time-related bias.
+
+5) Running the client to collect data
+- Use `HybridTlsClient` to perform the handshakes; redirect its console output to `results/raw/` so each run's `CSV_OUTPUT:` line is preserved. Example single-run client command:
+
+```bash
+java -cp target/classes bench.HybridTlsClient classical 10 500 > results/raw/client_classical_10x_1.log 2>&1
+```
+
+- The client prints per-trial console lines and a single CSV summary line with the header `concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput` which `ResultsAnalyzer` can parse.
+
+6) Repeat and rotate
+- Repeat the above client run for the configured number of trials. Between trials you may restart the server to avoid persistent state effects. When possible, alternate the order of modes (e.g., run hybrid first in some trials and classical first in others).
+
+7) Aggregate and analyze
+- After collecting logs under `results/raw/`, either:
+  - Run the included analyzer: `java -cp target/classes bench.ResultsAnalyzer` — it will read `results/raw/*` and write `results/tail_latency_summary.csv`, and print comparison summaries.
+  - Or extract the CSV_OUTPUT lines manually and aggregate them (e.g., with Python/pandas) to compute median-of-trials and confidence intervals.
+
+8) Metrics and interpretation
+- Primary latency metrics: mean, median, p90, p95, p99, and max (ms). We focused on p99 (tail latency) to understand worst-case behavior under load.
+- Throughput: connections per second (aggregated across threads and runs).
+- Interpretation: compare classical vs hybrid on the same machine/JVM flags, and report relative overheads (percent change) for mean and p99.
+
+Experiment configurations used
+-----------------------------
+These are the exact configurations and commands we used during the experiments described in this project. Use them as a reference to reproduce the results.
+
+- Warm-up (one per mode):
+
+```bash
+# warm up hybrid (100 sequential handshakes)
+java -cp target/classes bench.HybridTlsClient hybrid 1 100 > results/raw/client_hybrid_warmup.log 2>&1
+```
+
+- Latency-focused runs (single-thread, many runs):
+
+```bash
+# classical latency distribution: 1 thread × 500 runs
+java -cp target/classes bench.HybridTlsClient classical 1 500 > results/raw/client_classical_1x_500.log 2>&1
+
+# hybrid latency distribution: 1 thread × 500 runs
+java -cp target/classes bench.HybridTlsClient hybrid 1 500 > results/raw/client_hybrid_1x_500.log 2>&1
+```
+
+- Concurrency-focused runs (throughput and tail under load):
+
+```bash
+# classical throughput: 10 threads × 1000 runs each
+java -cp target/classes bench.HybridTlsClient classical 10 1000 > results/raw/client_classical_10x_1000.log 2>&1
+
+# hybrid throughput: 10 threads × 1000 runs each
+java -cp target/classes bench.HybridTlsClient hybrid 10 1000 > results/raw/client_hybrid_10x_1000.log 2>&1
+```
+
+- High-concurrency stress runs (if resources permit):
+
+```bash
+# classical stress: 100 threads × 500 runs
+java -cp target/classes bench.HybridTlsClient classical 100 500 > results/raw/client_classical_100x_500.log 2>&1
+
+# hybrid stress: 100 threads × 500 runs
+java -cp target/classes bench.HybridTlsClient hybrid 100 500 > results/raw/client_hybrid_100x_500.log 2>&1
+```
+
+- Trials and rotation pattern used in the study:
+  - For each configuration above we ran 3 independent trials.
+  - Trial order was randomized per configuration; server was restarted between trials to reduce carry-over effects.
+
+9) Example end-to-end routine (one configuration)
+- Build:
+
+```bash
+./mvnw -q package
+```
+
+- Create keystore if needed:
+
+```bash
+keytool -genkeypair -alias server -keyalg RSA -keystore target/server.keystore -storepass changeit -keypass changeit -dname "CN=localhost" -validity 365
+```
+
+- Start server (hybrid) and capture logs:
+
+```bash
+java -cp target/classes bench.HybridTlsServer hybrid 8443 > results/raw/server_hybrid.log 2>&1 &
+```
+
+- Warm-up (100 handshakes):
+
+```bash
+java -cp target/classes bench.HybridTlsClient hybrid 1 100 > results/raw/client_hybrid_warmup.log 2>&1
+```
+
+- Measurement run (e.g., 10 threads × 500 runs):
+
+```bash
+java -cp target/classes bench.HybridTlsClient hybrid 10 500 > results/raw/client_hybrid_10x_500.log 2>&1
+```
+
+- Stop/restart server if desired and repeat for classical mode.
+
+10) Notes on variations and caution
+- If hybrid negotiation is not supported by the JVM (server logs will show supported named groups), the hybrid attempt may fall back or the handshake may fail — ensure the server log confirms negotiation parameters.
+- For high-concurrency runs you may need to tune the server's thread pool or OS limits (file descriptors) to avoid unrelated resource limitations.
 
 Test results (summary)
 ----------------------
