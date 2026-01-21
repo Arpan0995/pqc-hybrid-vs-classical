@@ -1,16 +1,20 @@
 package bench;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
 public class ResultsAnalyzer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultsAnalyzer.class);
+
     public static void main(String[] args) throws Exception {
-        System.out.println("===========================================");
-        System.out.println("    TAIL LATENCY ANALYSIS: CLASSICAL vs HYBRID");
-        System.out.println("===========================================");
-        System.out.println();
+        LOGGER.info("===========================================");
+        LOGGER.info("    TAIL LATENCY ANALYSIS: CLASSICAL vs HYBRID");
+        LOGGER.info("===========================================");
 
         // Expected files: results/raw/classical_1x.log, classical_10x.log, etc.
         String[] concurrencyLevels = {"1x", "10x", "100x"};
@@ -79,22 +83,20 @@ public class ResultsAnalyzer {
 
     private static void printComparisonTable(Map<String, Map<String, Stats>> results,
                                              String[] levels) {
-        System.out.println("=== LATENCY COMPARISON TABLE (ms) ===");
-        System.out.println();
-        System.out.printf("%-12s %-10s %-10s %-10s %-10s %-10s %-10s%n",
-                "Mode", "Load", "Mean", "Median", "p90", "p95", "p99");
-        System.out.println("-".repeat(72));
+        LOGGER.info("=== LATENCY COMPARISON TABLE (ms) ===");
+        LOGGER.info("");
+        LOGGER.info(String.format("%-12s %-10s %-10s %-10s %-10s %-10s %-10s","Mode", "Load", "Mean", "Median", "p90", "p95", "p99"));
+        LOGGER.info("-".repeat(72));
 
         for (String mode : results.keySet()) {
             for (String level : levels) {
                 Stats s = results.get(mode).get(level);
                 if (s != null) {
-                    System.out.printf("%-12s %-10s %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f%n",
-                            mode, level, s.mean, s.median, s.p90, s.p95, s.p99);
+                    LOGGER.info(String.format("%-12s %-10s %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f", mode, level, s.mean, s.median, s.p90, s.p95, s.p99));
                 }
             }
         }
-        System.out.println();
+        LOGGER.info("");
     }
 
     private static void writeSummaryCsv(Map<String, Map<String, Stats>> results,
@@ -113,14 +115,14 @@ public class ResultsAnalyzer {
                 }
             }
         }
-        System.out.println("Results saved to: results/tail_latency_summary.csv");
-        System.out.println();
+        LOGGER.info("Results saved to: results/tail_latency_summary.csv");
+        LOGGER.info("");
     }
 
     private static void printAsciiChart(Map<String, Map<String, Stats>> results,
                                         String[] levels) {
-        System.out.println("=== p99 LATENCY COMPARISON (ASCII CHART) ===");
-        System.out.println();
+        LOGGER.info("=== p99 LATENCY COMPARISON (ASCII CHART) ===");
+        LOGGER.info("");
 
         double maxP99 = 0;
         for (String mode : results.keySet()) {
@@ -130,23 +132,23 @@ public class ResultsAnalyzer {
         }
 
         for (String level : levels) {
-            System.out.println("Load: " + level);
+            LOGGER.info("Load: " + level);
             for (String mode : results.keySet()) {
                 Stats s = results.get(mode).get(level);
                 if (s != null) {
                     int barLen = (int) ((s.p99 / maxP99) * 50);
                     String bar = "#".repeat(Math.max(1, barLen));
-                    System.out.printf("  %-10s |%s (%.2f ms)%n", mode, bar, s.p99);
+                    LOGGER.info(String.format("  %-10s |%s (%.2f ms)", mode, bar, s.p99));
                 }
             }
-            System.out.println();
+            LOGGER.info("");
         }
     }
 
     private static void printFindings(Map<String, Map<String, Stats>> results,
                                       String[] levels) {
-        System.out.println("=== RESEARCH FINDINGS ===");
-        System.out.println();
+        LOGGER.info("=== RESEARCH FINDINGS ===");
+        LOGGER.info("");
 
         for (String level : levels) {
             Stats classical = results.get("classical") != null ?
@@ -160,17 +162,17 @@ public class ResultsAnalyzer {
                 double throughputChange = ((hybrid.throughput - classical.throughput) /
                         classical.throughput) * 100;
 
-                System.out.printf("At %s load:%n", level);
-                System.out.printf("  - Hybrid mean latency: +%.1f%% vs classical%n", meanOverhead);
-                System.out.printf("  - Hybrid p99 latency:  +%.1f%% vs classical%n", p99Overhead);
-                System.out.printf("  - Hybrid throughput:   %.1f%% vs classical%n", throughputChange);
-                System.out.println();
+                LOGGER.info(String.format("At %s load:", level));
+                LOGGER.info(String.format("  - Hybrid mean latency: +%.1f%% vs classical", meanOverhead));
+                LOGGER.info(String.format("  - Hybrid p99 latency:  +%.1f%% vs classical", p99Overhead));
+                LOGGER.info(String.format("  - Hybrid throughput:   %.1f%% vs classical", throughputChange));
+                LOGGER.info("");
             }
         }
 
-        System.out.println("KEY INSIGHT: p99 overhead grows faster than mean overhead under load,");
-        System.out.println("indicating hybrid TLS requires additional capacity for tail latency SLAs.");
-        System.out.println();
+        LOGGER.info("KEY INSIGHT: p99 overhead grows faster than mean overhead under load,");
+        LOGGER.info("indicating hybrid TLS requires additional capacity for tail latency SLAs.");
+        LOGGER.info("");
     }
 
     static class Stats {

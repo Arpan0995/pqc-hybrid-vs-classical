@@ -12,8 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HybridTlsClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HybridTlsClient.class);
+
     private final String host;
     private final int port;
     private final String[] namedGroups;
@@ -28,16 +32,24 @@ public class HybridTlsClient {
 
     public static void main(String[] args) {
         try {
-            if (args.length < 3) {
-                System.err.println("Usage: HybridTlsClient classical|hybrid <concurrency> <runsPerThread>");
-                System.err.println("Example: HybridTlsClient classical 10 100");
-                System.err.println("  → 10 concurrent threads, 100 connections each = 1000 total");
+            if (args.length < 1) {
+                LOGGER.error("Usage: HybridTlsClient classical|hybrid [concurrency runsPerThread]");
+                LOGGER.error("Example: HybridTlsClient classical 10 100");
+                LOGGER.error("  Or: HybridTlsClient classical  (defaults to concurrency=1,runsPerThread=1)");
                 System.exit(1);
             }
 
             String mode = args[0].toLowerCase();
-            int concurrency = Integer.parseInt(args[1]);
-            int runsPerThread = Integer.parseInt(args[2]);
+            int concurrency = 1;
+            int runsPerThread = 1;
+            if (args.length >= 3) {
+                concurrency = Integer.parseInt(args[1]);
+                runsPerThread = Integer.parseInt(args[2]);
+            } else if (args.length == 2) {
+                // allow: mode concurrency
+                concurrency = Integer.parseInt(args[1]);
+                runsPerThread = 1;
+            }
 
             String[] namedGroups;
             switch (mode) {
@@ -47,22 +59,27 @@ public class HybridTlsClient {
                 case "hybrid":
                     namedGroups = new String[]{"X25519MLKEM768", "x25519"};
                     break;
+                case "pqc":
+                case "pqc-only":
+                    namedGroups = new String[]{"MLKEM768"};
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown mode: " + mode);
             }
 
-            System.out.println("===========================================");
-            System.out.println("Client Mode: " + mode.toUpperCase());
-            System.out.println("TLS Named Groups: " + String.join(", ", namedGroups));
-            System.out.println("Concurrency: " + concurrency + " threads");
-            System.out.println("Runs per thread: " + runsPerThread);
-            System.out.println("Total connections: " + (concurrency * runsPerThread));
-            System.out.println("===========================================");
+            LOGGER.info("===========================================");
+            LOGGER.info("Client Mode: {}", mode.toUpperCase());
+            LOGGER.info("TLS Named Groups: {}", String.join(", ", namedGroups));
+            LOGGER.info("Concurrency: {} threads", concurrency);
+            LOGGER.info("Runs per thread: {}", runsPerThread);
+            LOGGER.info("Total connections: {}", (concurrency * runsPerThread));
+            LOGGER.info("===========================================");
 
             HybridTlsClient client = new HybridTlsClient("localhost", 8443, namedGroups);
             client.runConcurrentBenchmark(concurrency, runsPerThread);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Error running client", e);
+            System.exit(1);
         }
     }
 
@@ -119,12 +136,19 @@ public class HybridTlsClient {
                 concurrency, runsPerThread, totalSeconds);
     }
 
+    /* package-private helper for tests */
+    double runSingleHandshake() throws Exception {
+        return runSingleConnection();
+    }
+
     private double runSingleConnection() throws Exception {
         SSLSocketFactory factory = sslContext.getSocketFactory();
 
         try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
             SSLParameters params = socket.getSSLParameters();
             params.setProtocols(new String[]{"TLSv1.3"});
+            // ensure SNI is present
+            params.setServerNames(Collections.singletonList(new SNIHostName(host)));
             if (namedGroups != null && namedGroups.length > 0) {
                 params.setNamedGroups(namedGroups);
             }
@@ -150,7 +174,7 @@ public class HybridTlsClient {
     private void printResults(List<Double> times, int success, int fail,
                               int concurrency, int runsPerThread, double totalSeconds) {
         if (times.isEmpty()) {
-            System.err.println("No successful connections!");
+            LOGGER.error("No successful connections!");
             return;
         }
 
@@ -170,32 +194,32 @@ public class HybridTlsClient {
 
         double throughput = success / totalSeconds;
 
-        System.out.println();
-        System.out.println("===========================================");
-        System.out.println("           BENCHMARK RESULTS");
-        System.out.println("===========================================");
-        System.out.println();
-        System.out.printf("Connections: %d success, %d failed%n", success, fail);
-        System.out.printf("Duration: %.2f seconds%n", totalSeconds);
-        System.out.printf("Throughput: %.2f connections/sec%n", throughput);
-        System.out.println();
-        System.out.println("--- Handshake Latency (ms) ---");
-        System.out.printf("  Min:    %.3f%n", min);
-        System.out.printf("  Mean:   %.3f%n", mean);
-        System.out.printf("  Median: %.3f%n", median);
-        System.out.printf("  p90:    %.3f%n", p90);
-        System.out.printf("  p95:    %.3f%n", p95);
-        System.out.printf("  p99:    %.3f%n", p99);
-        System.out.printf("  Max:    %.3f%n", max);
-        System.out.println();
-        System.out.println("===========================================");
+        LOGGER.info("");
+        LOGGER.info("===========================================");
+        LOGGER.info("           BENCHMARK RESULTS");
+        LOGGER.info("===========================================");
+        LOGGER.info("");
+        LOGGER.info("Connections: {} success, {} failed", success, fail);
+        LOGGER.info("Duration: {} seconds", String.format("%.2f", totalSeconds));
+        LOGGER.info("Throughput: {} connections/sec", String.format("%.2f", throughput));
+        LOGGER.info("");
+        LOGGER.info("--- Handshake Latency (ms) ---");
+        LOGGER.info(String.format("  Min:    %.3f", min));
+        LOGGER.info(String.format("  Mean:   %.3f", mean));
+        LOGGER.info(String.format("  Median: %.3f", median));
+        LOGGER.info(String.format("  p90:    %.3f", p90));
+        LOGGER.info(String.format("  p95:    %.3f", p95));
+        LOGGER.info(String.format("  p99:    %.3f", p99));
+        LOGGER.info(String.format("  Max:    %.3f", max));
+        LOGGER.info("");
+        LOGGER.info("===========================================");
 
         // CSV output for easy parsing
-        System.out.println();
-        System.out.println("CSV_OUTPUT:");
-        System.out.printf("concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput%n");
-        System.out.printf("%d,%d,%d,%d,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.2f%n",
-                concurrency, runsPerThread, success, fail, mean, median, p90, p95, p99, max, throughput);
+        LOGGER.info("");
+        LOGGER.info("CSV_OUTPUT:");
+        LOGGER.info("concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput");
+        LOGGER.info(String.format("%d,%d,%d,%d,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.2f",
+                concurrency, runsPerThread, success, fail, mean, median, p90, p95, p99, max, throughput));
     }
 
     private double percentile(List<Double> sortedList, double p) {
