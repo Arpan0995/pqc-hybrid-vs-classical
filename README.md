@@ -3,20 +3,20 @@ Java-PQC-Hybrid
 
 Overview
 --------
-This repository contains a small Java benchmark harness for comparing classical TLS key-exchange (e.g. X25519) against hybrid and PQC-enabled key-exchange groups (MLKEM variants). The project provides:
+What we tested and why
+- This project compares two TLS key-exchange configurations: a classical-only configuration (using X25519) and a hybrid configuration (a hybrid named-group that pairs a post-quantum primitive with a classical primitive). The goal was to measure functional compatibility and the runtime performance impact (handshake latency and basic throughput) of using a hybrid key-exchange versus a classical-only key-exchange.
+- Purpose: quantify the additional handshake cost (average and tail latency) and verify whether hybrid negotiation behaves differently (compatibility/fallback) compared to classical-only setups. These results help assess whether hybrid TLS is practical from a latency and interoperability perspective.
 
-- A minimal TLS server (`bench.HybridTlsServer`) that can be started in `classical`, `hybrid`, or `pqc` modes and accepts concurrent connections.
-- A client benchmarker (`bench.HybridTlsClient`) that runs handshakes (single or concurrent) and prints per-run timing and a CSV summary line labeled `CSV_OUTPUT:` for easy parsing.
-- A small `ResultsAnalyzer` utility to read CSV output from saved logs and produce summary tables and an ASCII chart.
-
-This README explains the prerequisites, how to create a test keystore, common run commands, and the recommended test methodology to produce reproducible comparisons.
+What the repository contains
+- `bench.HybridTlsServer` — a small TLS server that can run in `classical` or `hybrid` modes and logs handshake timing and negotiated parameters.
+- `bench.HybridTlsClient` — a client benchmark that runs handshakes (single or concurrent) and prints aggregated CSV output suitable for automated analysis.
+- `bench.ResultsAnalyzer` — simple log/C SV parser that summarizes the CSV output and prints basic comparisons.
 
 Prerequisites (high level)
 -------------------------
-- Java 17+ or a modern JDK (the project was compiled against Java 21 in CI runs). Using the same JDK for all experiments is important for fair comparisons.
+- Java 17+ (or the JDK you intend to measure). Use the same JDK for all experiments to ensure fair comparisons.
 - Maven (or use the included `./mvnw` wrapper) to build and run tests.
-- Optional: a JDK or vendor build that exposes PQC/hybrid named-groups (if you want to exercise `hybrid` or `pqc` modes end-to-end). If the JDK doesn't support those named groups, the server will log the supported groups and the integration test will skip modes it cannot run.
-- (Tests) BouncyCastle is used by the test utilities to generate in-memory keystores when running tests; Maven handles this dependency.
+- For local tests we used BouncyCastle in tests (Maven handles this dependency).
 
 How to create a JKS keystore (test key)
 ----------------------------------------
@@ -83,40 +83,49 @@ Run the client with concurrency and runs per thread:
 java -cp target/classes bench.HybridTlsClient classical 10 100 > results/raw/client_classical_10x.log 2>&1
 ```
 
+To run hybrid mode (if supported by your JDK's named-group support):
+
+```bash
+java -cp target/classes bench.HybridTlsServer hybrid 8443 > results/raw/server_hybrid.log 2>&1 &
+java -cp target/classes bench.HybridTlsClient hybrid  > results/raw/client_hybrid.log 2>&1
+```
+
 Important logging notes
-- All code now uses SLF4J for logging. The project does not ship a logging backend by default — if you want structured file logging (rather than shell redirection), add a SLF4J binding such as Logback to the classpath and supply a configuration (logback.xml).
-- The server prints the supported named groups at startup (INFO) so you can verify exact PQC/hybrid label strings supported by your JVM.
+- All code uses SLF4J for logging. The project does not ship a logging backend by default — if you want structured file logging (rather than shell redirection), add a SLF4J binding such as Logback to the classpath and supply a configuration (logback.xml).
+- The server prints the supported named groups at startup (INFO) so you can verify the exact label strings your JVM supports.
 
-Test methodology (recommended)
-------------------------------
-Goal: measure handshake latency (and optionally throughput) for classical, hybrid, and PQC modes with reliable statistics.
+Where the code sets the named-group label
+----------------------------------------
+- `HybridTlsServer.main` and `HybridTlsClient.main` map the logical mode names to the TLS named-group strings. By default the code uses:
+  - classical: `x25519`
+  - hybrid: `X25519MLKEM768`, `x25519`
 
-1) Environment control
-- Use the same JDK binary and identical JVM flags for all modes.
-- Run on the same hardware (or same cloud instance snapshot) to minimize noise.
-- Prefer to run tests on an otherwise idle machine and disable frequency scaling where possible.
+If your JDK uses different labels for the hybrid group, change these strings in the two main methods to exactly match the names reported by your JVM.
 
-2) Warm-up
-- Warm up the JVM to let JIT compile hot paths: run ~100 warm-up handshakes before measurements.
+Test methodology (what we ran and what we verified)
+--------------------------------------------------
+This section documents exactly what tests were implemented and executed against this codebase and the outcomes observed (past tense):
 
-3) Iterations & concurrency
-- For latency: run many sequential handshakes (e.g., 1 thread × 500–5000 runs) to compute per-run latency distribution.
-- For throughput & tail behaviour: run concurrent clients (e.g., 10/50/100 threads) with several hundred runs each.
-- Use multiple independent trials and randomize the order of modes (classical/hybrid/pqc) across trials to avoid drift bias.
+- Unit-level checks: we created unit tests that validated the server's SSLContext creation and the ability to obtain an SSLServerSocketFactory. These tests ensured the code paths that load keystores and initialize key managers behaved as expected.
 
-4) Metrics to collect
-- Per-run handshake latency (measured with System.nanoTime — both client and server record timing in code). The client prints a `CSV_OUTPUT:` line that includes aggregated metrics suitable for ingestion.
-- Negotiated TLS protocol and cipher suite (logged by server/client per-connection).
-- Aggregate stats: min, mean, median, p90, p95, p99, max, and throughput (connections/sec).
-- Optional: process-level CPU/memory during experiments for resource comparison.
+- Keystore validation: one test programmatically generated a JKS keystore (using BouncyCastle) and wrote it to `target/server.keystore`. The test invoked the server's keystore-loading helper and asserted an SSLContext was returned, confirming the keystore loading path worked with a generated certificate.
 
-5) Data capture & analysis
-- Redirect the console output to files under `results/raw/` (see examples above). Each client run writes a `CSV_OUTPUT:` line to stdout which the `ResultsAnalyzer` (or any CSV tool) can parse.
-- Use the provided `ResultsAnalyzer` (`bench.ResultsAnalyzer`) to summarize `results/raw/*` logs and write `results/tail_latency_summary.csv`.
+- Integration smoke test: we implemented an integration-style smoke test that:
+  - Wrote a temporary keystore into `target/server.keystore`.
+  - Started `HybridTlsServer` in a background thread on an ephemeral port.
+  - Ran `HybridTlsClient` to perform a single handshake against the running server for both `classical` and `hybrid` modes; the test programmatically checked the JVM's supported named-groups and skipped a mode when the named-group required for that mode was not present on the running JVM.
+  - Verified that the client did not throw exceptions during the handshake and that the server recorded handshake timing and negotiated parameters.
 
-6) Reproducibility checklist
-- Keep a short text file that records: JDK vendor/version, OS, hardware, JVM flags, keystore used, experiment command lines, and the timestamp for each trial.
-- Run each mode several times (3–5 trials) and report median-of-trials for stability.
+- Logging & diagnostics: during the smoke tests we used the server logs (which list supported named groups at startup) and the client's CSV output lines to confirm successful negotiation and to capture handshake timings for analysis.
+
+Test results (summary)
+----------------------
+- The code compiled and the tests we added in this workspace passed: `./mvnw test` produced a successful build.
+- The integration smoke test completed a successful classical handshake; hybrid mode was exercised only when the running JVM reported support for the hybrid named-group.
+
+Data capture and analysis
+-------------------------
+- Client runs produced `CSV_OUTPUT:` lines with aggregated metrics (mean/median/p90/p95/p99/max and throughput) which were parsed by `ResultsAnalyzer` to create `results/tail_latency_summary.csv` for analysis.
 
 CSV schema (what to expect in the `CSV_OUTPUT:` line)
 -----------------------------------------------------
@@ -134,7 +143,7 @@ The client prints a CSV line with the following fields (header `concurrency,runs
 
 Troubleshooting
 ---------------
-- If you see `missing_extension` or other handshake alert errors, check supported named groups printed by the server. The hybrid/PQC group label must match exactly what the JVM supports.
+- If you see `missing_extension` or other handshake alert errors, check supported named groups printed by the server. The hybrid group label must match exactly what the JVM supports.
 - If the client prints `No successful connections!` check server logs and ensure the keystore exists and the server is listening on the expected port.
 
 Appendix: Example quick-run sequence
@@ -164,11 +173,3 @@ java -cp target/classes bench.HybridTlsClient classical > results/raw/client_cla
 java -cp target/classes bench.ResultsAnalyzer
 # or open results/raw/*.log and inspect CSV_OUTPUT lines, then run the analyzer
 ```
-
-If you want, I can add:
-- A `logback.xml` and Logback dependency so the app writes logs to `results/raw` automatically (no shell redirection needed).
-- A small convenience script (`scripts/run_experiment.sh`) that wraps keystore creation, server start, client runs, and cleanup.
-
----
-
-README created at: `README.md` in the project root. I ran the Maven test build afterwards — the project still builds successfully. Would you like me to (1) add Logback and a default `logback.xml` to send server/client logs automatically to `results/raw/`, or (2) add the convenience run script next? Pick one (or both) and I'll implement it and re-run the verification steps.
