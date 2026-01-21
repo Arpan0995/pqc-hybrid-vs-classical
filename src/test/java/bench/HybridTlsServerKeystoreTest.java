@@ -10,8 +10,10 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -48,8 +50,8 @@ public class HybridTlsServerKeystoreTest {
         ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(kp.getPrivate());
         X509Certificate cert = new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
 
-        // put into a keystore
-        char[] pass = "testpass".toCharArray();
+        // put into a keystore using password 'changeit' because the server expects that by default
+        char[] pass = "changeit".toCharArray();
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(null, null);
         ks.setKeyEntry("alias", kp.getPrivate(), pass, new java.security.cert.Certificate[]{cert});
@@ -57,12 +59,27 @@ public class HybridTlsServerKeystoreTest {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         ks.store(bout, pass);
 
-        // call the package-private helper with the generated keystore
+        // write keystore to file 'server.keystore' so the server's createServerContext() can load it
+        File keystoreFile = new File("server.keystore");
+        try (FileOutputStream fos = new FileOutputStream(keystoreFile)) {
+            fos.write(bout.toByteArray());
+            fos.flush();
+        }
+
         HybridTlsServer srv = new HybridTlsServer(0, null);
-        try (ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray())) {
-            assertDoesNotThrow(() -> {
-                srv.createServerContext(bin, pass);
-            });
+        try {
+            Method m = HybridTlsServer.class.getDeclaredMethod("createServerContext");
+            m.setAccessible(true);
+            Object ctx = m.invoke(srv);
+            assertNotNull(ctx);
+        } finally {
+            // cleanup
+            if (keystoreFile.exists()) {
+                boolean deleted = keystoreFile.delete();
+                if (!deleted) {
+                    keystoreFile.deleteOnExit();
+                }
+            }
         }
     }
 }
