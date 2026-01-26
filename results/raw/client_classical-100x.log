@@ -1,30 +1,30 @@
-15:34:58.910 [main] INFO bench.HybridTlsClient -- ===========================================
-15:34:58.912 [main] INFO bench.HybridTlsClient -- Client Mode: CLASSICAL
-15:34:58.912 [main] INFO bench.HybridTlsClient -- TLS Named Groups: x25519
-15:34:58.912 [main] INFO bench.HybridTlsClient -- Concurrency: 100 threads
-15:34:58.912 [main] INFO bench.HybridTlsClient -- Runs per thread: 10
-15:34:58.912 [main] INFO bench.HybridTlsClient -- Total connections: 1000
-15:34:58.912 [main] INFO bench.HybridTlsClient -- ===========================================
-15:34:59.817 [main] INFO bench.HybridTlsClient -- 
-15:34:59.817 [main] INFO bench.HybridTlsClient -- ===========================================
-15:34:59.817 [main] INFO bench.HybridTlsClient --            BENCHMARK RESULTS
-15:34:59.817 [main] INFO bench.HybridTlsClient -- ===========================================
-15:34:59.818 [main] INFO bench.HybridTlsClient -- 
-15:34:59.818 [main] INFO bench.HybridTlsClient -- Connections: 1000 success, 0 failed
-15:34:59.821 [main] INFO bench.HybridTlsClient -- Duration: 0.86 seconds
-15:34:59.821 [main] INFO bench.HybridTlsClient -- Throughput: 1156.38 connections/sec
-15:34:59.822 [main] INFO bench.HybridTlsClient -- 
-15:34:59.822 [main] INFO bench.HybridTlsClient -- --- Handshake Latency (ms) ---
-15:34:59.822 [main] INFO bench.HybridTlsClient --   Min:    0.475
-15:34:59.822 [main] INFO bench.HybridTlsClient --   Mean:   35.891
-15:34:59.822 [main] INFO bench.HybridTlsClient --   Median: 27.616
-15:34:59.822 [main] INFO bench.HybridTlsClient --   p90:    62.979
-15:34:59.822 [main] INFO bench.HybridTlsClient --   p95:    102.678
-15:34:59.822 [main] INFO bench.HybridTlsClient --   p99:    164.968
-15:34:59.822 [main] INFO bench.HybridTlsClient --   Max:    184.377
-15:34:59.822 [main] INFO bench.HybridTlsClient -- 
-15:34:59.822 [main] INFO bench.HybridTlsClient -- ===========================================
-15:34:59.822 [main] INFO bench.HybridTlsClient -- 
-15:34:59.822 [main] INFO bench.HybridTlsClient -- CSV_OUTPUT:
-15:34:59.822 [main] INFO bench.HybridTlsClient -- concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput
-15:34:59.822 [main] INFO bench.HybridTlsClient -- 100,10,1000,0,35.891,27.616,62.979,102.678,164.968,184.377,1156.38
+15:08:52.413 [main] INFO bench.HybridTlsClient -- ===========================================
+15:08:52.415 [main] INFO bench.HybridTlsClient -- Client Mode: CLASSICAL
+15:08:52.416 [main] INFO bench.HybridTlsClient -- TLS Named Groups: x25519
+15:08:52.416 [main] INFO bench.HybridTlsClient -- Concurrency: 100 threads
+15:08:52.416 [main] INFO bench.HybridTlsClient -- Runs per thread: 10
+15:08:52.416 [main] INFO bench.HybridTlsClient -- Total connections: 1000
+15:08:52.416 [main] INFO bench.HybridTlsClient -- ===========================================
+15:08:53.877 [main] INFO bench.HybridTlsClient -- 
+15:08:53.877 [main] INFO bench.HybridTlsClient -- ===========================================
+15:08:53.877 [main] INFO bench.HybridTlsClient --            BENCHMARK RESULTS
+15:08:53.877 [main] INFO bench.HybridTlsClient -- ===========================================
+15:08:53.877 [main] INFO bench.HybridTlsClient -- 
+15:08:53.877 [main] INFO bench.HybridTlsClient -- Connections: 1000 success, 0 failed
+15:08:53.882 [main] INFO bench.HybridTlsClient -- Duration: 1.41 seconds
+15:08:53.882 [main] INFO bench.HybridTlsClient -- Throughput: 707.14 connections/sec
+15:08:53.882 [main] INFO bench.HybridTlsClient -- 
+15:08:53.882 [main] INFO bench.HybridTlsClient -- --- Handshake Latency (ms) ---
+15:08:53.882 [main] INFO bench.HybridTlsClient --   Min:    1.204
+15:08:53.882 [main] INFO bench.HybridTlsClient --   Mean:   54.783
+15:08:53.882 [main] INFO bench.HybridTlsClient --   Median: 40.710
+15:08:53.882 [main] INFO bench.HybridTlsClient --   p90:    78.648
+15:08:53.882 [main] INFO bench.HybridTlsClient --   p95:    176.738
+15:08:53.882 [main] INFO bench.HybridTlsClient --   p99:    304.527
+15:08:53.882 [main] INFO bench.HybridTlsClient --   Max:    331.111
+15:08:53.882 [main] INFO bench.HybridTlsClient -- 
+15:08:53.882 [main] INFO bench.HybridTlsClient -- ===========================================
+15:08:53.882 [main] INFO bench.HybridTlsClient -- 
+15:08:53.882 [main] INFO bench.HybridTlsClient -- CSV_OUTPUT:
+15:08:53.882 [main] INFO bench.HybridTlsClient -- concurrency,runs,success,fail,mean_ms,median_ms,p90_ms,p95_ms,p99_ms,max_ms,throughput
+15:08:53.882 [main] INFO bench.HybridTlsClient -- 100,10,1000,0,54.783,40.710,78.648,176.738,304.527,331.111,707.14
